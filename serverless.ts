@@ -1,6 +1,7 @@
 import type { AWS } from '@serverless/typescript';
 
-import { hello } from './src/functions';
+import { products } from './src/functions';
+import resources from './src/resources';
 
 const serverlessConfiguration: AWS = {
   useDotenv: true,
@@ -12,7 +13,7 @@ const serverlessConfiguration: AWS = {
   plugins: ['serverless-esbuild', 'serverless-dotenv-plugin'],
   provider: {
     name: 'aws',
-    runtime: 'nodejs18.x',
+    runtime: 'nodejs16.x',
     region: 'eu-west-3',
     stage: '${self:custom.stage}',
     iam: {
@@ -30,7 +31,7 @@ const serverlessConfiguration: AWS = {
               'dynamodb:BatchGetItem',
               'dynamodb:Query',
             ],
-            Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/flex-app-${self:provider.stage}',
+            Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/flex-market-products-${self:provider.stage}',
           },
         ],
       },
@@ -51,10 +52,6 @@ const serverlessConfiguration: AWS = {
           audience: ['https://api.flex-market.abiehler.com'],
           issuerUrl: 'https://dev-v0o6dpfxq5so8mnl.us.auth0.com/',
         },
-        /* adminAuthorizer: {
-          type: 'request',
-          functionName: 'userAuthorizer',
-        }, */
       },
     },
   },
@@ -70,11 +67,12 @@ const serverlessConfiguration: AWS = {
   },
   resources: {
     Resources: {
+      ...resources,
     },
   },
 
   functions: {
-    hello,
+    ...products,
   },
 };
 

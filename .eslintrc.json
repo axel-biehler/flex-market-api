@@ -1,0 +1,83 @@
+{
+    "root": true,
+    "env": {
+        "commonjs": true,
+        "es2021": true,
+        "node": true,
+        "jest/globals": true
+    },
+    "extends": ["airbnb-base"],
+    "rules": {
+        "max-classes-per-file": "off",
+        "import/prefer-default-export": "off",
+        "class-methods-use-this": "off",
+        "no-console": "off",
+        "no-underscore-dangle" : "off",
+        "max-len": [
+            "error",
+            {
+                "code": 150
+            }
+        ],
+        "no-await-in-loop": "off"
+    },
+    "overrides": [
+        {
+            "files": ["*.ts", "*.tsx"],
+            "parser": "@typescript-eslint/parser",
+            "plugins": ["@typescript-eslint", "jest"],
+            "extends": ["airbnb-typescript/base"],
+            "parserOptions": {
+                "ecmaVersion": 12,
+                "project": ["./tsconfig.json"]
+            },
+            "rules": {
+                "@typescript-eslint/no-floating-promises": ["error"],
+                "@typescript-eslint/no-use-before-define": "off",
+                "@typescript-eslint/naming-convention": [
+                    "error",
+                    {
+                        "selector": "typeParameter",
+                        "format": ["UPPER_CASE", "PascalCase"]
+                    }
+                ]
+            }
+        },
+        {
+            "files": ["*.test.ts", "./__e2e__/**/*.ts", "./__e2e__/**/*.js", "./services/common/libTest/*", "*.typeTest.ts"],
+            "rules": {
+                "import/no-extraneous-dependencies": "off"
+            }
+        },
+        {
+            "files": ["*handler.ts"],
+            "rules": {
+                "import/prefer-default-export": "off"
+            }
+        },
+        {
+            "files": ["*.test.ts"],
+            "rules": {
+                "max-classes-per-file": "off",
+                "class-methods-use-this": "off",
+                "no-useless-escape": "off"
+            }
+        },
+        {
+            "files": ["serverless.ts", "./services/dynamodb/config.ts", "global-config.ts"],
+            "rules": {
+                "no-template-curly-in-string": "off",
+                "import/no-import-module-exports":"off"
+            }
+        },
+        {
+            "files": ["./scripts/**/*.ts"],
+            "rules": {
+                "import/no-extraneous-dependencies":"off"
+            }
+        }
+    ],
+    "settings": {
+        "import/core-modules": ["aws-sdk"]
+    }
+}

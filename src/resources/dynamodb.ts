@@ -3,7 +3,7 @@ export default {
   FlexMarketTable: {
     Type: 'AWS::DynamoDB::Table',
     Properties: {
-      TableName: 'flex-market-${self:provider.stage}',
+      TableName: 'flex-market-products-${self:provider.stage}',
       KeySchema: [
         { AttributeName: 'id', KeyType: 'HASH' },
       ],
@@ -11,6 +11,9 @@ export default {
         ReadCapacityUnits: '${self:custom.table_throughput}',
         WriteCapacityUnits: '${self:custom.table_throughput}',
       },
+      AttributeDefinitions: [
+        { AttributeName: 'id', AttributeType: 'S' },
+      ],
       SSESpecification: {
         SSEEnabled: true,
       },

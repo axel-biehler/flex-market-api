@@ -1,5 +1,5 @@
-import dynamodbTable from './dynamodb';
+import dynamodbTableProducts from './dynamodb';
 
 export default {
-  ...dynamodbTable,
+  ...dynamodbTableProducts,
 };
