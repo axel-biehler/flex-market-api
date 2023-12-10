@@ -1,6 +1,6 @@
 import type { AWS } from '@serverless/typescript';
 
-import { products } from './src/functions';
+import { products , profile } from './src/functions';
 import resources from './src/resources';
 
 const serverlessConfiguration: AWS = {
@@ -13,7 +13,7 @@ const serverlessConfiguration: AWS = {
   plugins: ['serverless-esbuild', 'serverless-dotenv-plugin'],
   provider: {
     name: 'aws',
-    runtime: 'nodejs16.x',
+    runtime: 'nodejs18.x',
     region: 'eu-west-3',
     stage: '${self:custom.stage}',
     iam: {
@@ -33,6 +33,15 @@ const serverlessConfiguration: AWS = {
             ],
             Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/flex-market-products-${self:provider.stage}',
           },
+          {
+            Effect: "Allow",
+            Action: [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:DeleteObject",
+            ],
+            Resource: ["arn:aws:s3:::flex-market-public/*"],
+          }
         ],
       },
     },
@@ -73,6 +82,7 @@ const serverlessConfiguration: AWS = {
 
   functions: {
     ...products,
+    ...profile,
   },
 };
 
