@@ -1,21 +1,59 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import Ajv from 'ajv';
+import { nanoid } from 'nanoid';
 import ProductsRepository from '../../repository/ProductsRepository';
+import S3Repository from '../../repository/S3Repository';
 
 const productSchema = {
   type: 'object',
   properties: {
     name: { type: 'string' },
-    price: { type: 'number' },
     description: { type: 'string' },
-    quantity: { type: 'number' },
-    imageUrls: {
+    price: { type: 'number' },
+    specs: {
+      type: 'object',
+      additionalProperties: { type: 'string' },
+    },
+    stock: {
+      type: 'object',
+      additionalProperties: { type: 'number' },
+    },
+    imagesUrl: {
       type: 'array',
       items: { type: 'string' },
-      minItems: 1,
+    },
+    gender: {
+      type: 'string',
+      enum: ['MEN', 'WOMEN', 'UNISEX'],
+    },
+    createdAt: { type: 'string' },
+    category: {
+      type: 'string',
+      enum: [
+        'TOPS',
+        'BOTTOMS',
+        'DRESSES',
+        'OUTERWEAR',
+        'UNDERWEAR',
+        'FOOTWEAR',
+        'ACCESSORIES',
+        'ATHLETIC',
+        'SLEEPWEAR',
+        'SWIMWEAR',
+      ],
     },
   },
-  required: ['name', 'price', 'description', 'quantity', 'imageUrls'],
+  required: [
+    'name',
+    'description',
+    'price',
+    'specs',
+    'stock',
+    'imagesUrl',
+    'gender',
+    'createdAt',
+    'category',
+  ],
   additionalProperties: false,
 };
 
@@ -44,15 +82,29 @@ export default async function handler(event: APIGatewayProxyEventV2): Promise<AP
   }
 
   try {
-    const product = JSON.parse(event.body!);
+    const product = {
+      id: nanoid(),
+      ...JSON.parse(event.body!),
+    };
     const repository = new ProductsRepository();
+    const s3Repository = new S3Repository(process.env.PUBLIC_BUCKET_NAME!);
 
-    await repository.createProduct(product);
+    const imageUrls = await Promise.all(
+      product.imagesUrl.map(async (imageUrl: string) => s3Repository.generatePutPresignedUrl(`${product.id}/${imageUrl}`)),
+    );
+
+    const productWithImages = {
+      ...product,
+      imagesUrl: product.imagesUrl.map((imageUrl: string) => `${process.env.PUBLIC_BUCKET_URL}/${product.id}/${imageUrl}`),
+    };
+
+    await repository.createProduct(productWithImages);
 
     return {
       statusCode: 200,
       body: JSON.stringify({
         message: 'Product created',
+        presignedUrls: imageUrls,
       }),
     };
   } catch (error) {

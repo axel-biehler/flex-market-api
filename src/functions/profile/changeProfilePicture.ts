@@ -31,8 +31,7 @@ export default async function handler(event: APIGatewayProxyEventV2): Promise<AP
   const objectKey = `${userInfo?.sub!}/${JSON.parse(body).key}`;
   const token = await getManagementToken();
   const profileRepository = new ProfilesRepository(token.access_token);
-  const url = await s3Repository.generatePresignedUrl(objectKey);
-  console.log(objectKey);
+  const url = await s3Repository.generatePutPresignedUrl(objectKey);
   await profileRepository.updateProfile(userInfo?.sub!, {
     picture: `${process.env.PUBLIC_BUCKET_URL}/${objectKey}`,
   });

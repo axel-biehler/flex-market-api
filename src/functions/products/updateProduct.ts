@@ -1,9 +1,54 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
+import Ajv from 'ajv';
 import ProductsRepository from '../../repository/ProductsRepository';
 import { Product } from '../../models/Product';
+import S3Repository from '../../repository/S3Repository';
+
+const productSchema = {
+  type: 'object',
+  properties: {
+    name: { type: 'string' },
+    description: { type: 'string' },
+    price: { type: 'number' },
+    specs: {
+      type: 'object',
+      additionalProperties: { type: 'string' },
+    },
+    stock: {
+      type: 'object',
+      additionalProperties: { type: 'number' },
+    },
+    imagesUrl: {
+      type: 'array',
+      items: { type: 'string' },
+    },
+    gender: {
+      type: 'string',
+      enum: ['MEN', 'WOMEN', 'UNISEX'],
+    },
+    createdAt: { type: 'string' },
+    category: {
+      type: 'string',
+      enum: [
+        'TOPS',
+        'BOTTOMS',
+        'DRESSES',
+        'OUTERWEAR',
+        'UNDERWEAR',
+        'FOOTWEAR',
+        'ACCESSORIES',
+        'ATHLETIC',
+        'SLEEPWEAR',
+        'SWIMWEAR',
+      ],
+    },
+    additionalProperties: false,
+  },
+};
 
 export default async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
   const id = event.pathParameters?.id;
+  const ajv = new Ajv();
 
   if (!id) {
     return {
@@ -27,24 +72,52 @@ export default async function handler(event: APIGatewayProxyEventV2): Promise<AP
       };
     }
 
-    const input = JSON.parse(event.body!);
+    const validate = ajv.compile(productSchema);
+
+    const input: Partial<Product> = JSON.parse(event.body!);
+
+    if (!validate(input)) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: 'Invalid body',
+          errors: validate.errors,
+        }),
+      };
+    }
 
     const newProduct: Product = {
       id: product.id,
-      description: input.description || product.description,
-      imageUrls: input.imageUrls || product.imageUrls,
       name: input.name || product.name,
+      description: input.description || product.description,
       price: input.price || product.price,
-      quantity: input.quantity || product.quantity,
+      specs: product.specs,
+      stock: product.stock,
+      imagesUrl: input.imagesUrl || product.imagesUrl,
+      gender: product.gender,
       createdAt: product.createdAt,
+      category: product.category,
+    };
+    const s3Repository = new S3Repository(process.env.PUBLIC_BUCKET_NAME!);
+
+    const imageUrls = await Promise.all(
+      product.imagesUrl.map(async (imageUrl: string) => s3Repository.generatePutPresignedUrl(`${product.id}/${imageUrl}`)),
+    );
+
+    const productWithImages = {
+      ...newProduct,
+      imagesUrl: product.imagesUrl.map((imageUrl: string) => `${process.env.PUBLIC_BUCKET_URL}/${product.id}/${imageUrl}`),
     };
 
-    await repository.updateProduct(product.id, newProduct);
+    await repository.updateProduct(product.id, productWithImages);
 
     return {
       statusCode: 200,
       body: JSON.stringify({
         message: 'Product updated',
+        body: {
+          s3Urls: imageUrls,
+        },
       }),
     };
   } catch (error) {

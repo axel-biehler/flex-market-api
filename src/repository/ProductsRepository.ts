@@ -1,26 +1,30 @@
-import { nanoid } from 'nanoid';
-import { DocumentClient } from 'aws-sdk/clients/dynamodb';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import {
+  DynamoDBDocumentClient, PutCommand, GetCommand, UpdateCommand, DeleteCommand, ScanCommand,
+} from '@aws-sdk/lib-dynamodb';
 import { Product } from '../models/Product';
 
 export default class ProductsRepository {
-  private dynamodb: DocumentClient = new DocumentClient({ region: process.env.REGION! });
+  private dynamoDbClient: DynamoDBDocumentClient;
+
+  constructor() {
+    const client = new DynamoDBClient({ region: process.env.REGION });
+    this.dynamoDbClient = DynamoDBDocumentClient.from(client);
+  }
 
   public async createProduct(product: Product): Promise<any> {
+    console.log('here');
+    console.log(product);
     const item: Product = {
-      id: nanoid(),
-      description: product.description,
-      imageUrls: product.imageUrls,
-      name: product.name,
-      price: product.price,
-      quantity: product.quantity,
+      ...product,
       createdAt: new Date().toISOString(),
     };
 
     try {
-      await this.dynamodb.put({
-        TableName: process.env.PRODUCTS_TABLE!,
+      await this.dynamoDbClient.send(new PutCommand({
+        TableName: process.env.PRODUCTS_TABLE,
         Item: item,
-      }).promise();
+      }));
     } catch (error) {
       console.error(error);
       throw new Error('Error creating product');
@@ -29,12 +33,10 @@ export default class ProductsRepository {
 
   public async getProduct(id: string): Promise<Product | undefined> {
     try {
-      const result = await this.dynamodb.get({
-        TableName: process.env.PRODUCTS_TABLE!,
-        Key: {
-          id,
-        },
-      }).promise();
+      const result = await this.dynamoDbClient.send(new GetCommand({
+        TableName: process.env.PRODUCTS_TABLE,
+        Key: { id },
+      }));
 
       return result.Item as Product;
     } catch (error) {
@@ -44,12 +46,11 @@ export default class ProductsRepository {
 
   public async updateProduct(id: string, product: Product): Promise<void> {
     try {
-      await this.dynamodb.update({
-        TableName: process.env.PRODUCTS_TABLE!,
-        Key: {
-          id,
-        },
-        UpdateExpression: 'set #name = :name, price = :price, description = :description, quantity = :quantity, imageUrls = :imageUrls',
+      await this.dynamoDbClient.send(new UpdateCommand({
+        TableName: process.env.PRODUCTS_TABLE,
+        Key: { id },
+        UpdateExpression: 'set #name = :name, price = :price, description = :description, specs = :specs, '
+            + 'stock = :stock, imagesUrl = :imagesUrl, gender = :gender, createdAt = :createdAt, category = :category',
         ExpressionAttributeNames: {
           '#name': 'name',
         },
@@ -57,10 +58,14 @@ export default class ProductsRepository {
           ':name': product.name,
           ':price': product.price,
           ':description': product.description,
-          ':quantity': product.quantity,
-          ':imageUrls': product.imageUrls,
+          ':specs': product.specs,
+          ':stock': product.stock,
+          ':imagesUrl': product.imagesUrl,
+          ':gender': product.gender,
+          ':createdAt': product.createdAt,
+          ':category': product.category,
         },
-      }).promise();
+      }));
     } catch (error) {
       throw new Error('Error updating product');
     }
@@ -68,12 +73,10 @@ export default class ProductsRepository {
 
   public async deleteProduct(id: string): Promise<void> {
     try {
-      await this.dynamodb.delete({
-        TableName: process.env.PRODUCTS_TABLE!,
-        Key: {
-          id,
-        },
-      }).promise();
+      await this.dynamoDbClient.send(new DeleteCommand({
+        TableName: process.env.PRODUCTS_TABLE,
+        Key: { id },
+      }));
     } catch (error) {
       throw new Error('Error deleting product');
     }
@@ -81,9 +84,9 @@ export default class ProductsRepository {
 
   public async getProducts(): Promise<Product[]> {
     try {
-      const result = await this.dynamodb.scan({
-        TableName: process.env.PRODUCTS_TABLE!,
-      }).promise();
+      const result = await this.dynamoDbClient.send(new ScanCommand({
+        TableName: process.env.PRODUCTS_TABLE,
+      }));
 
       return result.Items as Product[];
     } catch (error) {
