@@ -1,7 +1,7 @@
 import type { AWS } from '@serverless/typescript';
 
-import { products , profile } from './src/functions';
-import resources from './src/resources';
+import { products , profile, cart } from './src/functions';
+import { dynamodbTableProducts, dynamodbTableCarts, dynamodbTableFavorites } from './src/resources';
 
 const serverlessConfiguration: AWS = {
   useDotenv: true,
@@ -32,6 +32,34 @@ const serverlessConfiguration: AWS = {
               'dynamodb:Query',
             ],
             Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/flex-market-products-${self:provider.stage}',
+          },
+          {
+            Effect: 'Allow',
+            Action: [
+              'dynamodb:PutItem',
+              'dynamodb:GetItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:Scan',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:BatchGetItem',
+              'dynamodb:Query',
+            ],
+            Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/flex-market-cart-${self:provider.stage}',
+          },
+          {
+            Effect: 'Allow',
+            Action: [
+              'dynamodb:PutItem',
+              'dynamodb:GetItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:Scan',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:BatchGetItem',
+              'dynamodb:Query',
+            ],
+            Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/flex-market-favorites-${self:provider.stage}',
           },
           {
             Effect: "Allow",
@@ -76,13 +104,16 @@ const serverlessConfiguration: AWS = {
   },
   resources: {
     Resources: {
-      ...resources,
+      ...dynamodbTableProducts,
+      ...dynamodbTableCarts,
+      ...dynamodbTableFavorites,
     },
   },
 
   functions: {
     ...products,
     ...profile,
+    ...cart,
   },
 };
 

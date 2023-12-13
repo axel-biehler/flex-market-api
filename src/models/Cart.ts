@@ -1,10 +1,13 @@
-import { Product } from './Product';
+import { ItemSize } from './Product';
+
+export interface CartItem {
+  itemId: string;
+  quantity: number;
+  size: ItemSize;
+}
 
 export interface Cart {
-  id: string;
   userId: string;
-  items: {
-    product: Product;
-    quantity: number;
-  }[];
+  items: CartItem[];
+  totalAmount: number;
 }

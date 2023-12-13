@@ -32,7 +32,7 @@ export interface Product {
   description: string;
   price: number;
   specs: { [key: string]: string };
-  stock: { [key: string]: string };
+  stock: { [key: string]: number };
   imagesUrl: string[];
   gender: ItemGender,
   createdAt: string;

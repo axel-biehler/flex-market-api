@@ -13,8 +13,6 @@ export default class ProductsRepository {
   }
 
   public async createProduct(product: Product): Promise<any> {
-    console.log('here');
-    console.log(product);
     const item: Product = {
       ...product,
       createdAt: new Date().toISOString(),

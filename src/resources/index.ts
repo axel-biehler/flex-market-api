@@ -1,5 +1,9 @@
-import dynamodbTableProducts from './dynamodb';
+import dynamodbTableProducts from './dynamodb.products';
+import dynamodbTableCarts from './dynamodb.carts';
+import dynamodbTableFavorites from './dynamodb.favorites';
 
-export default {
-  ...dynamodbTableProducts,
+export {
+  dynamodbTableProducts,
+  dynamodbTableCarts,
+  dynamodbTableFavorites,
 };
