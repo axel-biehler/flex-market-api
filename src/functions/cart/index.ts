@@ -30,7 +30,23 @@ const emptyCart = {
   ],
 };
 
+const getCartById = {
+  handler: `${handlerPath(__dirname)}/handler.getCartById`,
+  events: [
+    {
+      httpApi: {
+        method: 'get',
+        path: '/carts',
+        authorizer: {
+          name: 'jwtAuthorizer',
+        },
+      },
+    },
+  ],
+};
+
 export {
   addToCart,
   emptyCart,
+  getCartById,
 };
