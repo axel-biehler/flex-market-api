@@ -1,6 +1,9 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
-  DynamoDBDocumentClient, GetCommand, PutCommand,
+  DeleteCommand,
+  DynamoDBDocumentClient,
+  GetCommand,
+  PutCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { Cart } from '../models/Cart';
 
@@ -53,5 +56,14 @@ export default class CartsRepository {
       console.log(error);
       return undefined;
     }
+  }
+
+  public removeById(userId: string): Promise<any> {
+    return this.dynamoDbClient.send(new DeleteCommand({
+      TableName: process.env.CARTS_TABLE!,
+      Key: {
+        userId,
+      },
+    }));
   }
 }

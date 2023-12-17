@@ -10,7 +10,7 @@ const cartSchema = {
   type: 'object',
   properties: {
     itemId: { type: 'string' },
-    quantity: { type: 'integer', minimum: 1 },
+    quantity: { type: 'integer', minimum: 0 },
     size: {
       type: 'string',
       enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
@@ -70,35 +70,44 @@ export default async function handler(event: APIGatewayProxyEventV2): Promise<AP
 
     const currentCart: Cart | undefined = await cartsRepository.getById(userInfo?.sub!);
 
-    let newCartItems: CartItem[];
+    let newCartItems: CartItem[] = [];
 
-    console.log('CURRENT', currentCart);
-    console.log(body.itemId);
-    console.log(currentCart?.items.find((item) => item.itemId === body.itemId && item.size === body.size));
-
-    if (currentCart !== undefined && currentCart.items.find((item) => item.itemId === body.itemId && item.size === body.size) !== undefined) {
-      const currentCartItem = currentCart.items.find((item) => item.itemId === body.itemId && item.size === body.size);
-      const currentCartItems = currentCart.items.filter((item) => item.itemId !== body.itemId && item.size !== body.size);
-
-      newCartItems = [
-        ...currentCartItems,
-        {
-          ...currentCartItem!,
-          quantity: currentCartItem!.quantity + body.quantity,
-        },
-      ];
-      console.log('newCartItems with new quantity', newCartItems);
-    } else {
-      newCartItems = [...(currentCart?.items || []), body];
-      console.log(...(currentCart?.items || []), body);
-      console.log('newCartItems with new items', newCartItems);
+    if (currentCart) {
+      if (currentCart.items.find((item) => item.itemId === body.itemId && item.size === body.size) !== undefined) {
+        newCartItems = currentCart.items.map((item) => {
+          if (item.itemId === body.itemId && item.size === body.size) {
+            return {
+              ...item,
+              quantity: body.quantity,
+            };
+          }
+          return item;
+        });
+      } else {
+        newCartItems = [
+          ...currentCart.items,
+          body,
+        ];
+      }
     }
+
+    newCartItems = newCartItems.filter((item) => item.quantity > 0);
 
     const newCart: Cart = {
       userId: userInfo?.sub!,
       items: newCartItems,
       totalAmount: await getCartTotalPrice(newCartItems),
     };
+
+    if (newCart.items.length === 0) {
+      await cartsRepository.removeById(userInfo?.sub!);
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          message: 'Cart emptied',
+        }),
+      };
+    }
 
     await cartsRepository.addOrUpdateCart(newCart);
 

@@ -15,6 +15,22 @@ const addToCart = {
   ],
 };
 
+const emptyCart = {
+  handler: `${handlerPath(__dirname)}/handler.emptyCart`,
+  events: [
+    {
+      httpApi: {
+        method: 'delete',
+        path: '/carts',
+        authorizer: {
+          name: 'jwtAuthorizer',
+        },
+      },
+    },
+  ],
+};
+
 export {
   addToCart,
+  emptyCart,
 };
