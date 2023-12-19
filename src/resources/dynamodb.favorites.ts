@@ -5,14 +5,14 @@ export default {
     Properties: {
       TableName: 'flex-market-favorites-${self:provider.stage}',
       KeySchema: [
-        { AttributeName: 'id', KeyType: 'HASH' },
+        { AttributeName: 'userId', KeyType: 'HASH' },
       ],
       ProvisionedThroughput: {
         ReadCapacityUnits: '${self:custom.table_throughput}',
         WriteCapacityUnits: '${self:custom.table_throughput}',
       },
       AttributeDefinitions: [
-        { AttributeName: 'id', AttributeType: 'S' },
+        { AttributeName: 'userId', AttributeType: 'S' },
       ],
       SSESpecification: {
         SSEEnabled: true,

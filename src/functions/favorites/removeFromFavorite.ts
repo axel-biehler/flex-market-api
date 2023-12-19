@@ -4,7 +4,7 @@ import { getUserInfo } from '../../libs/getUserInfo';
 import { Favorite, FavoriteItem } from '../../models/Favorite';
 import FavoritesRepository from '../../repository/FavoritesRepository';
 
-const cartSchema = {
+const favoriteSchema = {
 
   type: 'object',
   properties: {
@@ -40,7 +40,7 @@ export default async function handler(event: APIGatewayProxyEventV2): Promise<AP
     };
   }
   try {
-    const validate = ajv.compile(cartSchema);
+    const validate = ajv.compile(favoriteSchema);
     const body = JSON.parse(event.body) as FavoriteItem;
     const userInfo = await getUserInfo(authorization);
     const favoritesRepository = new FavoritesRepository();

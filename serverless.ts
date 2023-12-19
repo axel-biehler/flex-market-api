@@ -1,6 +1,6 @@
 import type { AWS } from '@serverless/typescript';
 
-import { products , profile, cart } from './src/functions';
+import { products, profile, cart, favorites } from './src/functions';
 import { dynamodbTableProducts, dynamodbTableCarts, dynamodbTableFavorites } from './src/resources';
 
 const serverlessConfiguration: AWS = {
@@ -114,6 +114,7 @@ const serverlessConfiguration: AWS = {
     ...products,
     ...profile,
     ...cart,
+    ...favorites,
   },
 };
 

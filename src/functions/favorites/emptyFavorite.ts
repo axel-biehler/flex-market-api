@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { getUserInfo } from '../../libs/getUserInfo';
 import FavoritesRepository from '../../repository/FavoritesRepository';
 
-export default async function emptyFavorite(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+export default async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const authorization = event.headers?.authorization;
   if (!authorization) {
     return {

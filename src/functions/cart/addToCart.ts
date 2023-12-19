@@ -89,6 +89,10 @@ export default async function handler(event: APIGatewayProxyEventV2): Promise<AP
           body,
         ];
       }
+    } else {
+      newCartItems = [
+        body,
+      ];
     }
 
     newCartItems = newCartItems.filter((item) => item.quantity > 0);
@@ -99,7 +103,7 @@ export default async function handler(event: APIGatewayProxyEventV2): Promise<AP
       totalAmount: await getCartTotalPrice(newCartItems),
     };
 
-    if (newCart.items.length === 0) {
+    if (newCart.items.length <= 0) {
       await cartsRepository.removeById(userInfo?.sub!);
       return {
         statusCode: 200,

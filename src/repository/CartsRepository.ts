@@ -23,9 +23,7 @@ export default class CartsRepository {
         ConditionExpression: 'attribute_not_exists(cartId)', // Check if cartId doesn't exist
       }));
     } catch (error: any) {
-      console.log('here');
       if (error.name === 'ConditionalCheckFailedException') {
-        console.log('biloute');
         // If the cart already exists, update it instead
         await this.dynamoDbClient.send(new PutCommand({
           TableName: process.env.CARTS_TABLE!,
@@ -40,7 +38,6 @@ export default class CartsRepository {
 
   public async getById(userId: string): Promise<Cart | undefined> {
     try {
-      console.log('cartId', userId);
       const result = await this.dynamoDbClient.send(new GetCommand({
         TableName: process.env.CARTS_TABLE!,
         Key: {

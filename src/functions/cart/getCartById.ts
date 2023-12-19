@@ -2,7 +2,7 @@ import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import CartsRepository from '../../repository/CartsRepository';
 import { getUserInfo } from '../../libs/getUserInfo';
 
-export default async function getCartById(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
+export default async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
   const authorization = event.headers?.authorization;
   if (!authorization) {
     return {

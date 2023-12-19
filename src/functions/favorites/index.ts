@@ -1,7 +1,7 @@
 import { handlerPath } from '../../libs/handler-resolver';
 
-const addToCart = {
-  handler: `${handlerPath(__dirname)}/handler.addToCart`,
+const addToFavorite = {
+  handler: `${handlerPath(__dirname)}/handler.addToFavorite`,
   events: [
     {
       httpApi: {
@@ -15,8 +15,8 @@ const addToCart = {
   ],
 };
 
-const emptyCart = {
-  handler: `${handlerPath(__dirname)}/handler.emptyCart`,
+const emptyFavorite = {
+  handler: `${handlerPath(__dirname)}/handler.emptyFavorite`,
   events: [
     {
       httpApi: {
@@ -31,7 +31,7 @@ const emptyCart = {
 };
 
 const removeFromFavorite = {
-  handler: `${handlerPath(__dirname)}/handler.emptyCart`,
+  handler: `${handlerPath(__dirname)}/handler.removeFromFavorite`,
   events: [
     {
       httpApi: {
@@ -61,8 +61,8 @@ const getFavoriteById = {
 };
 
 export {
-  addToCart,
-  emptyCart,
+  addToFavorite,
+  emptyFavorite,
   removeFromFavorite,
   getFavoriteById,
 };

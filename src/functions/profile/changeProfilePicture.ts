@@ -36,8 +36,6 @@ export default async function handler(event: APIGatewayProxyEventV2): Promise<AP
     picture: `${process.env.PUBLIC_BUCKET_URL}/${objectKey}`,
   });
 
-  console.log(url);
-
   return {
     statusCode: 200,
     body: JSON.stringify({

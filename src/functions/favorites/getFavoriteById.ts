@@ -2,7 +2,7 @@ import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { getUserInfo } from '../../libs/getUserInfo';
 import FavoritesRepository from '../../repository/FavoritesRepository';
 
-export default async function getFavoriteById(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
+export default async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
   const authorization = event.headers?.authorization;
   if (!authorization) {
     return {
@@ -17,9 +17,9 @@ export default async function getFavoriteById(event: APIGatewayProxyEventV2): Pr
     const favoritesRepository = new FavoritesRepository();
     const userInfo = await getUserInfo(authorization);
 
-    const cart = await favoritesRepository.getById(userInfo?.sub!);
+    const favorite = await favoritesRepository.getById(userInfo?.sub!);
 
-    if (!cart) {
+    if (!favorite) {
       return {
         statusCode: 404,
         body: JSON.stringify({
@@ -30,7 +30,7 @@ export default async function getFavoriteById(event: APIGatewayProxyEventV2): Pr
 
     return {
       statusCode: 200,
-      body: JSON.stringify(cart),
+      body: JSON.stringify(favorite),
     };
   } catch (error) {
     return {

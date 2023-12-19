@@ -26,7 +26,6 @@ const productSchema = {
       type: 'string',
       enum: ['MEN', 'WOMEN', 'UNISEX'],
     },
-    createdAt: { type: 'string' },
     category: {
       type: 'string',
       enum: [
@@ -51,7 +50,6 @@ const productSchema = {
     'stock',
     'imagesUrl',
     'gender',
-    'createdAt',
     'category',
   ],
   additionalProperties: false,

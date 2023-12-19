@@ -4,7 +4,7 @@ import { getUserInfo } from '../../libs/getUserInfo';
 import { Favorite, FavoriteItem } from '../../models/Favorite';
 import FavoritesRepository from '../../repository/FavoritesRepository';
 
-const cartSchema = {
+const favoriteSchema = {
 
   type: 'object',
   properties: {
@@ -40,7 +40,7 @@ export default async function handler(event: APIGatewayProxyEventV2): Promise<AP
     };
   }
   try {
-    const validate = ajv.compile(cartSchema);
+    const validate = ajv.compile(favoriteSchema);
     const body = JSON.parse(event.body) as FavoriteItem;
     const userInfo = await getUserInfo(authorization);
     const favoritesRepository = new FavoritesRepository();
@@ -68,9 +68,12 @@ export default async function handler(event: APIGatewayProxyEventV2): Promise<AP
           }),
         };
       }
-    } else {
       favoriteItems = [
         ...currentFavorite!.items,
+        body,
+      ];
+    } else {
+      favoriteItems = [
         body,
       ];
     }
@@ -80,7 +83,7 @@ export default async function handler(event: APIGatewayProxyEventV2): Promise<AP
       items: favoriteItems,
     };
 
-    if (favorite.items.length === 0) {
+    if (favorite.items.length <= 0) {
       await favoritesRepository.removeById(userInfo?.sub!);
       return {
         statusCode: 200,
@@ -96,7 +99,7 @@ export default async function handler(event: APIGatewayProxyEventV2): Promise<AP
       return {
         statusCode: 400,
         body: JSON.stringify({
-          message: 'Invalid cart items',
+          message: 'Invalid favorite items',
           errors: validate.errors,
         }),
       };
@@ -105,14 +108,16 @@ export default async function handler(event: APIGatewayProxyEventV2): Promise<AP
     return {
       statusCode: 200,
       body: JSON.stringify({
-        message: 'items added to cart',
+        message: 'items added to favorite',
       }),
     };
   } catch (error) {
+    console.log(error);
     return {
       statusCode: 500,
       body: JSON.stringify({
-        message: 'Error adding to cart',
+        error,
+        message: 'Error adding to favorite',
       }),
     };
   }
