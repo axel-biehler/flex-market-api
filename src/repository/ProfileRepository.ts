@@ -17,6 +17,16 @@ export default class ProfilesRepository {
     return await response.json() as UserProfile;
   }
 
+  public async getRoles(id: string): Promise<any | undefined> {
+    const response = await fetch(`${process.env.AUTH0_DOMAIN}/api/v2/users/${id}/roles`, {
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
+    });
+
+    return await response.json() as any;
+  }
+
   public async updateProfile(userId: string, userData: Partial<UserProfile>): Promise<string> {
     const response = await fetch(`${process.env.AUTH0_DOMAIN}/api/v2/users/${userId}`, {
       method: 'PATCH',

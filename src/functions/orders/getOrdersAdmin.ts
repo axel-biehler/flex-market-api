@@ -1,9 +1,9 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
-import CartsRepository from '../../repository/CartsRepository';
-import { getUserInfo } from '../../libs/getUserInfo';
+import OrdersRepository from '../../repository/OrdersRepository';
 
 export default async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
   const authorization = event.headers?.authorization;
+
   if (!authorization) {
     return {
       statusCode: 400,
@@ -14,31 +14,21 @@ export default async function handler(event: APIGatewayProxyEventV2): Promise<AP
   }
 
   try {
-    const cartsRepository = new CartsRepository();
-    const userInfo = await getUserInfo(authorization);
+    const repository = new OrdersRepository();
 
-    const cart = await cartsRepository.getById(userInfo?.sub!);
-
-    if (!cart) {
-      return {
-        statusCode: 200,
-        body: JSON.stringify({
-          userId: userInfo?.sub!,
-          items: [],
-          totalAmount: 0,
-        }),
-      };
-    }
+    const orders = await repository.getOrders();
 
     return {
       statusCode: 200,
-      body: JSON.stringify(cart),
+      body: JSON.stringify({
+        orders,
+      }),
     };
   } catch (error) {
     return {
       statusCode: 500,
       body: JSON.stringify({
-        message: 'Error getting cart',
+        message: 'Error getting orders',
       }),
     };
   }

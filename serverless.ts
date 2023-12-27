@@ -1,7 +1,7 @@
 import type { AWS } from '@serverless/typescript';
 
-import { products, profile, cart, favorites } from './src/functions';
-import { dynamodbTableProducts, dynamodbTableCarts, dynamodbTableFavorites } from './src/resources';
+import { products, profile, cart, favorites, orders } from './src/functions';
+import { dynamodbTableProducts, dynamodbTableCarts, dynamodbTableFavorites, dynamodbTableOrders } from './src/resources';
 
 const serverlessConfiguration: AWS = {
   useDotenv: true,
@@ -62,6 +62,36 @@ const serverlessConfiguration: AWS = {
             Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/flex-market-favorites-${self:provider.stage}',
           },
           {
+            Effect: 'Allow',
+            Action: [
+              'dynamodb:PutItem',
+              'dynamodb:GetItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:Scan',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:BatchGetItem',
+              'dynamodb:Query',
+            ],
+            Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/flex-market-orders-${self:provider.stage}',
+          },
+          {
+            Effect: 'Allow',
+            Action: [
+              'dynamodb:PutItem',
+              'dynamodb:GetItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:Scan',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:BatchGetItem',
+              'dynamodb:Query',
+            ],
+            Resource: [
+              'arn:aws:dynamodb:${self:provider.region}:*:table/flex-market-orders-${self:provider.stage}',
+            ],
+          },
+          {
             Effect: "Allow",
             Action: [
                 "s3:GetObject",
@@ -107,6 +137,7 @@ const serverlessConfiguration: AWS = {
       ...dynamodbTableProducts,
       ...dynamodbTableCarts,
       ...dynamodbTableFavorites,
+      ...dynamodbTableOrders,
     },
   },
 
@@ -115,6 +146,7 @@ const serverlessConfiguration: AWS = {
     ...profile,
     ...cart,
     ...favorites,
+    ...orders,
   },
 };
 

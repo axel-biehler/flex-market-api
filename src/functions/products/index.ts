@@ -78,6 +78,26 @@ const getProducts = {
   ],
 };
 
+const searchProducts = {
+  handler: `${handlerPath(__dirname)}/handler.searchProducts`,
+  events: [
+    {
+      httpApi: {
+        method: 'post',
+        path: '/products/search',
+        authorizer: {
+          name: 'jwtAuthorizer',
+        },
+      },
+    },
+  ],
+};
+
 export {
-  addProduct, deleteProduct, updateProduct, getProductById, getProducts,
+  addProduct,
+  deleteProduct,
+  updateProduct,
+  getProductById,
+  getProducts,
+  searchProducts,
 };

@@ -45,4 +45,21 @@ const changeProfilePicture = {
   ],
 };
 
-export { getProfile, updateProfile, changeProfilePicture };
+const getRoles = {
+  handler: `${handlerPath(__dirname)}/handler.getRoles`,
+  events: [
+    {
+      httpApi: {
+        method: 'get',
+        path: '/me/roles',
+        authorizer: {
+          name: 'jwtAuthorizer',
+        },
+      },
+    },
+  ],
+};
+
+export {
+  getProfile, updateProfile, changeProfilePicture, getRoles,
+};

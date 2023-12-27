@@ -1,9 +1,10 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
+import OrdersRepository from '../../repository/OrdersRepository';
 import { getUserInfo } from '../../libs/getUserInfo';
-import FavoritesRepository from '../../repository/FavoritesRepository';
 
 export default async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
   const authorization = event.headers?.authorization;
+
   if (!authorization) {
     return {
       statusCode: 400,
@@ -14,30 +15,25 @@ export default async function handler(event: APIGatewayProxyEventV2): Promise<AP
   }
 
   try {
-    const favoritesRepository = new FavoritesRepository();
+    const repository = new OrdersRepository();
+
     const userInfo = await getUserInfo(authorization);
 
-    const favorite = await favoritesRepository.getById(userInfo?.sub!);
+    const orders = await repository.getOrders();
 
-    if (!favorite) {
-      return {
-        statusCode: 200,
-        body: JSON.stringify({
-          userId: userInfo?.sub!,
-          items: [],
-        }),
-      };
-    }
+    const filteredOrders = orders.filter((order) => order.userId === userInfo?.sub);
 
     return {
       statusCode: 200,
-      body: JSON.stringify(favorite),
+      body: JSON.stringify({
+        orders: filteredOrders,
+      }),
     };
   } catch (error) {
     return {
       statusCode: 500,
       body: JSON.stringify({
-        message: 'Error getting favorite',
+        message: 'Error getting orders',
       }),
     };
   }

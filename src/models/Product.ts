@@ -26,6 +26,12 @@ export enum Category {
   SWIMWEAR = 'SWIMWEAR',
 }
 
+export interface InputSearchProducts {
+  gender?: ItemGender;
+  category?: string[];
+  name?: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -37,4 +43,5 @@ export interface Product {
   gender: ItemGender,
   createdAt: string;
   category: Category;
+  searchName: string;
 }
