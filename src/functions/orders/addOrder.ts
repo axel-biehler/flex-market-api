@@ -3,7 +3,7 @@ import Ajv from 'ajv';
 import { nanoid } from 'nanoid';
 import OrdersRepository from '../../repository/OrdersRepository';
 import ProductsRepository from '../../repository/ProductsRepository';
-import { Order } from '../../models/Order';
+import { Order, OrderItem } from '../../models/Order';
 import { getUserInfo } from '../../libs/getUserInfo';
 
 const ordersSchema = {
@@ -12,13 +12,26 @@ const ordersSchema = {
   properties: {
     items: {
       type: 'array',
-      items: { type: 'string' },
+      items: {
+        type: 'object',
+        properties: {
+          itemId: { type: 'string' },
+          quantity: { type: 'number', minimum: 1 },
+          size: {
+            type: 'string',
+            enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+          },
+        },
+        required: ['itemId', 'quantity', 'size'],
+        additionalProperties: false,
+      },
     },
     shippingAddress: { type: 'string' },
   },
   required: ['items', 'shippingAddress'],
   additionalProperties: false,
 };
+
 export default async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
   const ajv = new Ajv();
 
@@ -64,12 +77,19 @@ export default async function handler(event: APIGatewayProxyEventV2): Promise<AP
     const ordersRepository = new OrdersRepository();
     const productsRepository = new ProductsRepository();
 
-    const items = await productsRepository.getProductsByUUIDs(order.items);
+    const items = await productsRepository.getProductsByUUIDs(order.items.map((item: OrderItem) => item.itemId));
 
     const newOrder: Order = {
       ...order,
       orderId: nanoid(),
-      items,
+      items: [
+        ...items.map((item) => ({
+          itemId: item.id,
+          quantity: order.items.find((orderItem: OrderItem) => orderItem.itemId === item.id)?.quantity!,
+          size: order.items.find((orderItem: OrderItem) => orderItem.itemId === item.id)?.size!,
+          price: item.price,
+        })),
+      ],
       orderDate: new Date().toISOString(),
       status: 'PENDING',
       totalAmount: items.reduce((acc, item) => acc + item.price, 0),

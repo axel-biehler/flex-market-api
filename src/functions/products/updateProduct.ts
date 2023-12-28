@@ -2,7 +2,6 @@ import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import Ajv from 'ajv';
 import ProductsRepository from '../../repository/ProductsRepository';
 import { Product } from '../../models/Product';
-import S3Repository from '../../repository/S3Repository';
 
 const productSchema = {
   type: 'object',
@@ -89,6 +88,7 @@ export default async function handler(event: APIGatewayProxyEventV2): Promise<AP
     const newProduct: Product = {
       id: product.id,
       name: input.name || product.name,
+      searchName: input.name ? input.name.toLowerCase() : product.searchName,
       description: input.description || product.description,
       price: input.price || product.price,
       specs: product.specs,
@@ -98,26 +98,13 @@ export default async function handler(event: APIGatewayProxyEventV2): Promise<AP
       createdAt: product.createdAt,
       category: product.category,
     };
-    const s3Repository = new S3Repository(process.env.PUBLIC_BUCKET_NAME!);
 
-    const imageUrls = await Promise.all(
-      product.imagesUrl.map(async (imageUrl: string) => s3Repository.generatePutPresignedUrl(`${product.id}/${imageUrl}`)),
-    );
-
-    const productWithImages = {
-      ...newProduct,
-      imagesUrl: product.imagesUrl.map((imageUrl: string) => `${process.env.PUBLIC_BUCKET_URL}/${product.id}/${imageUrl}`),
-    };
-
-    await repository.updateProduct(product.id, productWithImages);
+    await repository.updateProduct(product.id, newProduct);
 
     return {
       statusCode: 200,
       body: JSON.stringify({
         message: 'Product updated',
-        body: {
-          s3Urls: imageUrls,
-        },
       }),
     };
   } catch (error) {

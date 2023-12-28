@@ -41,4 +41,13 @@ export default class ProfilesRepository {
 
     return await response.json() as any;
   }
+
+  public async deleteUser(userId: string): Promise<void> {
+    await fetch(`${process.env.AUTH0_DOMAIN}/api/v2/users/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
+    });
+  }
 }

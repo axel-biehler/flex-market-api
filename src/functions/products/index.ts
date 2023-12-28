@@ -48,6 +48,22 @@ const updateProduct = {
   ],
 };
 
+const addProductImages = {
+  handler: `${handlerPath(__dirname)}/handler.addProductImages`,
+  events: [
+    {
+      httpApi: {
+        method: 'post',
+        path: '/products/{id}',
+        authorizer: {
+          name: 'jwtAuthorizer',
+          scopes: ['admin'],
+        },
+      },
+    },
+  ],
+};
+
 const getProductById = {
   handler: `${handlerPath(__dirname)}/handler.getProductById`,
   events: [
@@ -100,4 +116,5 @@ export {
   getProductById,
   getProducts,
   searchProducts,
+  addProductImages,
 };

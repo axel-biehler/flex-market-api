@@ -61,7 +61,7 @@ export default async function handler(event: APIGatewayProxyEventV2): Promise<AP
 
     if (currentFavorite) {
       if (currentFavorite.items.find((item) => item.itemId === body.itemId && item.size === body.size) !== undefined) {
-        favoriteItems = currentFavorite.items.filter((item) => item.itemId !== body.itemId && item.size !== body.size);
+        favoriteItems = currentFavorite.items.filter((item) => item.itemId !== body.itemId);
       } else {
         return {
           statusCode: 400,

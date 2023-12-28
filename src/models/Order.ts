@@ -1,3 +1,5 @@
+import { ItemSize } from './Product';
+
 export enum OrderStatus {
   PENDING = 'PENDING',
   COMPLETED = 'COMPLETED',
@@ -18,5 +20,6 @@ export interface Order {
 export interface OrderItem {
   itemId: string;
   quantity: number;
+  size: ItemSize;
   price: number;
 }

@@ -60,6 +60,21 @@ const getRoles = {
   ],
 };
 
+const deleteUser = {
+  handler: `${handlerPath(__dirname)}/handler.deleteUser`,
+  events: [
+    {
+      httpApi: {
+        method: 'delete',
+        path: '/me',
+        authorizer: {
+          name: 'jwtAuthorizer',
+        },
+      },
+    },
+  ],
+};
+
 export {
-  getProfile, updateProfile, changeProfilePicture, getRoles,
+  getProfile, updateProfile, changeProfilePicture, getRoles, deleteUser,
 };
